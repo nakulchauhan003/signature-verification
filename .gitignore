@@ -1,0 +1,38 @@
+# Virtual environments
+signature_env/
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.coverage
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Model files
+models/*.h5
+models/*.keras
+
+# Uploads
+uploads/
+
+# Results
+results/

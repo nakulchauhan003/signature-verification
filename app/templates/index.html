@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signature Verification System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Signature Verification System</h1>
+        
+        <div class="upload-section">
+            <h2>Verify Signature</h2>
+            <form id="verification-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="genuine-signature">Genuine Signature (Reference):</label>
+                    <input type="file" id="genuine-signature" name="genuine_signature" accept="image/*" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="test-signature">Test Signature (To Verify):</label>
+                    <input type="file" id="test-signature" name="test_signature" accept="image/*" required>
+                </div>
+                
+                <button type="submit">Verify Signature</button>
+            </form>
+        </div>
+        
+        <div class="batch-upload-section">
+            <h2>Batch Verification</h2>
+            <form id="batch-verification-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="batch-genuine-signature">Genuine Signature (Reference):</label>
+                    <input type="file" id="batch-genuine-signature" name="genuine_signature" accept="image/*" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="batch-test-signatures">Test Signatures (To Verify):</label>
+                    <input type="file" id="batch-test-signatures" name="test_signatures" accept="image/*" multiple required>
+                </div>
+                
+                <button type="submit">Batch Verify Signatures</button>
+            </form>
+        </div>
+        
+        <div id="result" class="result-section"></div>
+    </div>
+    
+    <script>
+        document.getElementById('verification-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/verify', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                displayResult(result);
+            } catch (error) {
+                document.getElementById('result').innerHTML = 
+                    `<div class="error">Error: ${error.message}</div>`;
+            }
+        });
+        
+        document.getElementById('batch-verification-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/batch_verify', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                displayBatchResult(result);
+            } catch (error) {
+                document.getElementById('result').innerHTML = 
+                    `<div class="error">Error: ${error.message}</div>`;
+            }
+        });
+        
+        function displayResult(result) {
+            const resultDiv = document.getElementById('result');
+            
+            if (result.error) {
+                resultDiv.innerHTML = `<div class="error">Error: ${result.error}</div>`;
+                return;
+            }
+            
+            const statusClass = result.is_valid ? 'success' : 'danger';
+            const statusText = result.is_valid ? 'Valid' : 'Invalid';
+            
+            resultDiv.innerHTML = `
+                <div class="result ${statusClass}">
+                    <h3>Verification Result</h3>
+                    <p><strong>Status:</strong> <span class="${statusClass}">${statusText}</span></p>
+                    <p><strong>Similarity Score:</strong> ${(result.similarity_score * 100).toFixed(2)}%</p>
+                    <p><strong>Risk Level:</strong> ${result.risk_analysis.risk_level}</p>
+                    <p><strong>Recommended Action:</strong> ${result.risk_analysis.recommended_action}</p>
+                    <p><strong>Confidence:</strong> ${(result.risk_analysis.confidence * 100).toFixed(2)}%</p>
+                    <p><strong>Message:</strong> ${result.message}</p>
+                    
+                    <details>
+                        <summary>Detailed Risk Analysis</summary>
+                        <div class="detailed-analysis">
+                            <h4>Risk Breakdown:</h4>
+                            <ul>
+                                <li>Similarity Risk: ${(result.risk_analysis.risk_breakdown.similarity_risk * 100).toFixed(2)}%</li>
+                                <li>Forgery Risk: ${(result.risk_analysis.risk_breakdown.forgery_risk * 100).toFixed(2)}%</li>
+                                <li>Drift Risk: ${(result.risk_analysis.risk_breakdown.drift_risk * 100).toFixed(2)}%</li>
+                                <li>Quality Risk: ${(result.risk_analysis.risk_breakdown.quality_risk * 100).toFixed(2)}%</li>
+                            </ul>
+                        </div>
+                    </details>
+                </div>
+            `;
+        }
+        
+        function displayBatchResult(result) {
+            const resultDiv = document.getElementById('result');
+            
+            if (result.error) {
+                resultDiv.innerHTML = `<div class="error">Error: ${result.error}</div>`;
+                return;
+            }
+            
+            let resultsHtml = '<div class="batch-result"><h3>Batch Verification Results</h3><ul>';
+            
+            result.results.forEach(item => {
+                const statusClass = item.is_valid ? 'success' : 'danger';
+                const statusText = item.is_valid ? 'Valid' : 'Invalid';
+                
+                resultsHtml += `
+                    <li class="result-item ${statusClass}">
+                        <strong>File:</strong> ${item.file_name}<br>
+                        <strong>Status:</strong> <span class="${statusClass}">${statusText}</span><br>
+                        <strong>Similarity:</strong> ${(item.similarity_score * 100).toFixed(2)}%<br>
+                        <strong>Risk Level:</strong> ${item.risk_analysis.risk_level}
+                    </li>
+                `;
+            });
+            
+            resultsHtml += '</ul></div>';
+            resultDiv.innerHTML = resultsHtml;
+        }
+    </script>
+</body>
+</html>
