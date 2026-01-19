@@ -45,16 +45,20 @@ SIAMESE_MODEL_SAVE_PATH = os.path.join(MODELS_PATH, "siamese_trained.h5")
 # Training Configuration
 # ===============================
 
-TRAINING_EPOCHS = 5          # keep small for now
-BATCH_SIZE = 8               # safe for CPU
+TRAINING_EPOCHS = 50         # Increased for better convergence with contrastive loss
+BATCH_SIZE = 16              # Increased batch size for better gradient estimates
 LEARNING_RATE = 0.001
 VALIDATION_SPLIT = 0.1
+
+# Contrastive Loss Configuration
+CONTRASTIVE_MARGIN = 1.5     # Margin for dissimilar pairs
+USE_CONTRASTIVE_LOSS = True  # Set to False to use MSE loss
 
 # ===============================
 # Verification Configuration
 # ===============================
 
-VERIFICATION_THRESHOLD = 0.5
+VERIFICATION_THRESHOLD = 0.65
 FORGERY_DETECTION_ENABLED = True
 DRIFT_DETECTION_ENABLED = True
 
