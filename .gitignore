@@ -27,9 +27,9 @@ Thumbs.db
 logs/
 *.log
 
-# Model files
-models/*.h5
-models/*.keras
+# Model files (not ignored - needed for Vercel deployment)
+# models/*.h5
+# models/*.keras
 
 # Uploads
 uploads/

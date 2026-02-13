@@ -25,7 +25,7 @@ setupDropZone(dropZone2, testInput, 'preview2', (file) => {
 function setupDropZone(dropZone, input, previewId, callback) {
     // Click to upload
     dropZone.addEventListener('click', () => input.click());
-    
+
     // File input change
     input.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -33,21 +33,21 @@ function setupDropZone(dropZone, input, previewId, callback) {
             handleFile(file, previewId, callback);
         }
     });
-    
+
     // Drag and drop
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropZone.classList.add('dragover');
     });
-    
+
     dropZone.addEventListener('dragleave', () => {
         dropZone.classList.remove('dragover');
     });
-    
+
     dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
         dropZone.classList.remove('dragover');
-        
+
         const file = e.dataTransfer.files[0];
         if (file && file.type.startsWith('image/')) {
             handleFile(file, previewId, callback);
@@ -72,25 +72,25 @@ function checkBothFiles() {
 // Verify button click
 verifyBtn.addEventListener('click', async () => {
     if (!referenceFile || !testFile) return;
-    
+
     // Show loading
     loading.style.display = 'block';
     result.style.display = 'none';
     verifyBtn.disabled = true;
-    
+
     // Prepare form data
     const formData = new FormData();
     formData.append('reference', referenceFile);
     formData.append('test', testFile);
-    
+
     try {
-        const response = await fetch('/verify', {
+        const response = await fetch('/api/verify', {
             method: 'POST',
             body: formData
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
             displayResult(data);
         } else {
@@ -106,7 +106,7 @@ verifyBtn.addEventListener('click', async () => {
 
 function displayResult(data) {
     const isGenuine = data.is_genuine;
-    
+
     result.className = 'result ' + (isGenuine ? 'genuine' : 'forged');
     result.innerHTML = `
         <h2>${data.verdict}</h2>
